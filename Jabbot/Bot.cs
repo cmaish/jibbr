@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
@@ -14,12 +12,12 @@ namespace Jabbot
 {
     public class Bot : IBot
     {
-        private HubConnection _connection;
-        private IHubProxy _chat;
-        private string _password;
-        private readonly List<ISprocket> _sprockets = new List<ISprocket>();
-        private readonly List<IUnhandledMessageSprocket> _unhandledMessageSprockets = new List<IUnhandledMessageSprocket>();
-        private readonly HashSet<string> _rooms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        readonly HubConnection _connection;
+        readonly IHubProxy _chat;
+        readonly string _password;
+        readonly List<ISprocket> _sprockets = new List<ISprocket>();
+        readonly List<IUnhandledMessageSprocket> _unhandledMessageSprockets = new List<IUnhandledMessageSprocket>();
+        readonly HashSet<string> _rooms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         public Bot(string url, string name, string password)
         {
@@ -163,6 +161,7 @@ namespace Jabbot
         {
             Send("/gravatar " + gravatarEmail);
         }
+
         /// <summary>
         /// Say something to the active room.
         /// </summary>
@@ -414,7 +413,9 @@ namespace Jabbot
                 // Just write to debug output if it failed
                 if (task.IsFaulted)
                 {
-                    Debug.WriteLine("JABBOT: Failed to process messages. {0}", task.Exception.GetBaseException());
+                    var aggregateException = task.Exception;
+                    if (aggregateException != null)
+                        Debug.WriteLine("JABBOT: Failed to process messages. {0}", aggregateException.GetBaseException());
                 }
             });
         }
@@ -457,12 +458,12 @@ namespace Jabbot
                 // Just write to debug output if it failed
                 if (task.IsFaulted)
                 {
-                    Debug.WriteLine("JABBOT: Failed to process messages. {0}", task.Exception.GetBaseException());
+                    var aggregateException = task.Exception;
+                    if (aggregateException != null)
+                        Debug.WriteLine("JABBOT: Failed to process messages. {0}", aggregateException.GetBaseException());
                 }
             });
-
         }
-
 
         private void OnLeave(dynamic user)
         {
