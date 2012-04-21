@@ -1,5 +1,6 @@
 ﻿using System;
 using Jabbot.Core;
+using Jabbot.Core.Sprockets;
 
 namespace SampleAnnouncement
 {

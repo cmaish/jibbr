@@ -3,6 +3,8 @@ using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using Jabbot.Core;
+using Jabbot.Core.Models;
+using Jabbot.Core.Sprockets;
 using Newtonsoft.Json.Linq;
 
 namespace WeatherSprocket

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using Jabbot.Core;
+using Jabbot.Core.Models;
+using Jabbot.Core.Sprockets;
 
 namespace Jabbot.CommandSprockets
 {

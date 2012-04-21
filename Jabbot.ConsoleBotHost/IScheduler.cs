@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Jabbot.Core;
+using Jabbot.Core.Sprockets;
 
 namespace Jabbot.ConsoleBotHost
 {

@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using Jabbot.Core;
+using Jabbot.Core.Sprockets;
 using TweetSharp;
 
 namespace TwitterAnnouncer

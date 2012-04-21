@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Jabbot.Core;
+using Jabbot.Core.Sprockets;
 using Newtonsoft.Json;
 
 namespace UserVoiceAnnouncer

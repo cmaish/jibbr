@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Jabbot.Core;
+using Jabbot.Core.Models;
+using Jabbot.Core.Sprockets;
 
 namespace Jabbot.CommandSprockets
 {

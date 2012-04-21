@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web.Hosting;
 using JabbR.Client;
 using Jabbot.Core;
+using Jabbot.Core.Sprockets;
 
 namespace Jabbot.ConsoleBotHost
 {
@@ -51,13 +52,16 @@ namespace Jabbot.ConsoleBotHost
                 foreach (var s in container.GetExportedValues<ISprocket>())
                     bot.AddSprocket(s);
 
-                JoinRooms(client);
+                //JoinRooms(client);
 
                 // TODO: deprecate this example
-                var firstRoom = client.GetRooms().Result;
-                client.Send("Hello World", firstRoom.FirstOrDefault().Name);
+            	var firstRoom = bot.Rooms.FirstOrDefault();
+            	if (firstRoom != null)
+            	{
+            		client.Send("Hello World", firstRoom.Name);
+            	}
 
-                scheduler.Start(announcements, bot);
+            	scheduler.Start(announcements, bot);
 
                 Console.Write("Press enter to quit...");
                 Console.ReadLine();
@@ -80,6 +84,7 @@ namespace Jabbot.ConsoleBotHost
             foreach (var room in BotRooms.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(r => r.Trim()))
             {
                 Console.Write("Joining {0}...", room);
+
                 var task = client.JoinRoom(room);
                 pendingTasks.Add(task);
                 task.Start();

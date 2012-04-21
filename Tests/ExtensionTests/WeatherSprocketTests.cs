@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Jabbot.Core;
+using Jabbot.Core.Models;
 using Moq;
 using NUnit.Framework;
 using Subject = WeatherSprocket.WeatherSprocket;

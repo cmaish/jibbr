@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using Jabbot.Core;
+using Jabbot.Core.Sprockets;
 
 namespace Jabbot.ConsoleBotHost
 {

@@ -1,4 +1,5 @@
 ﻿using Jabbot.Core;
+using Jabbot.Core.Models;
 using Jabbot.Extensions;
 using Moq;
 using NUnit.Framework;

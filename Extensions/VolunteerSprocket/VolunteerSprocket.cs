@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Jabbot.Core;
+using Jabbot.Core.Models;
+using Jabbot.Core.Sprockets;
 
 namespace VolunteerSprocket
 {
