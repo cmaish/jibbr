@@ -45,6 +45,7 @@ namespace Jabbot.ConsoleBotHost
                 Console.WriteLine(String.Format("Connecting to {0}...", ServerUrl));
 
                 var client = new JabbRClient(ServerUrl);
+
                 var bot = new Bot(client);
 
                 bot.Connect(BotName, BotPassword);
@@ -52,7 +53,7 @@ namespace Jabbot.ConsoleBotHost
                 foreach (var s in container.GetExportedValues<ISprocket>())
                     bot.AddSprocket(s);
 
-                //JoinRooms(client);
+                JoinRooms(client);
 
                 // TODO: deprecate this example
             	var firstRoom = bot.Rooms.FirstOrDefault();
@@ -87,7 +88,7 @@ namespace Jabbot.ConsoleBotHost
 
                 var task = client.JoinRoom(room);
                 pendingTasks.Add(task);
-                task.Start();
+                //task.Start();
             }
 
             Task.WaitAll(pendingTasks.ToArray());
