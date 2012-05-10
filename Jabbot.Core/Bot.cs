@@ -19,6 +19,7 @@ namespace Jabbot.Core
 			_client = client;
 
 			_client.RoomCountChanged += UpdateRoomList;
+			_client.MessageReceived += OnMessageReceived;
 		}
 
 		public string Name { get; private set; }
@@ -54,6 +55,19 @@ namespace Jabbot.Core
 			_client.RoomCountChanged -= UpdateRoomList;
 
 			_client.Disconnect();
+		}
+
+		private void OnMessageReceived(Message message, string room)
+		{
+			foreach (var sprocket in _sprockets)
+			{
+				var handled = sprocket.HandleMessage(this, message, room);
+
+				if (handled)
+				{
+					break;
+				}
+			}
 		}
 
 		public void Connect(string botName, string botPassword)
