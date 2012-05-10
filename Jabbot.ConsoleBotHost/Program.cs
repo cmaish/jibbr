@@ -47,11 +47,11 @@ namespace Jabbot.ConsoleBotHost
                 var client = new JabbRClient(ServerUrl);
 
                 var bot = new Bot(client);
-
-                bot.Connect(BotName, BotPassword);
                 
                 foreach (var s in container.GetExportedValues<ISprocket>())
                     bot.AddSprocket(s);
+
+                bot.Connect(BotName, BotPassword);
 
                 JoinRooms(client);
 
