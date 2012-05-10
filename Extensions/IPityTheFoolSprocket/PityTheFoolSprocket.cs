@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
+using JabbR.Client.Models;
 using Jabbot.Core;
-using Jabbot.Core.Models;
 using Jabbot.Core.Sprockets;
 
 namespace IPityTheFoolSprocket
@@ -12,9 +12,9 @@ namespace IPityTheFoolSprocket
 			get { return new Regex(@".*(?:fool|pity)+.*", RegexOptions.IgnoreCase); }
 		}
 
-		public override void ProcessMatch(Match match, ChatMessage chatMessage, IBot bot)
+		protected override void ProcessMatch(Match match, IBot bot, Message message, string room)
 		{
-			bot.Send("http://xamldev.dk/IPityTheFool.gif", chatMessage.User.Name);
+			bot.Send("http://xamldev.dk/IPityTheFool.gif", message.User.Name);
 		}
 	}
 }
