@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JabbR.Client.Models;
 using Jabbot.Core;
 using Jabbot.Core.Models;
 
@@ -47,5 +48,7 @@ namespace Jabbot.CommandSprockets
             }
             return false;
         }
+
+    	public abstract bool HandleMessage(IBot bot, Message message, string room);
     }
 }
