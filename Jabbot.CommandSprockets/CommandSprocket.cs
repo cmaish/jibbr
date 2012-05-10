@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using JabbR.Client.Models;
 using Jabbot.Core;
+using Jabbot.Core.Models;
 
 namespace Jabbot.CommandSprockets
 {
@@ -14,7 +14,7 @@ namespace Jabbot.CommandSprockets
 		public string Intitiator { get; protected set; }
 		public string Command { get; protected set; }
 		public string[] Arguments { get; protected set; }
-		public Message ChatMessage { get; protected set; }
+		public ChatMessage ChatMessage { get; protected set; }
 		public IBot Bot { get; protected set; }
 
 		public bool HasArguments
@@ -28,7 +28,7 @@ namespace Jabbot.CommandSprockets
 			       SupportedCommands.Any(c => c.Equals(command, StringComparison.OrdinalIgnoreCase));
 		}
 
-		public bool HandleMessage(IBot bot, Message message, string room)
+		public bool HandleMessage(IBot bot, ChatMessage message)
 		{
 			try
 			{

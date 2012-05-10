@@ -8,182 +8,184 @@ using Q = QuizSprocket;
 
 namespace ExtensionTests
 {
-    [TestFixture]
-    public class QuizSprocketTest
-    {
-        private Q.QuizSprocket _quizSprocket;
-        private Mock<IBot> _botMock;
-        [SetUp]
-        public void SetUp()
-        {
-            _quizSprocket = new Q.QuizSprocket();
-            _botMock = new Mock<IBot>();
-        }
+	[TestFixture]
+	public class QuizSprocketTest
+	{
+		[SetUp]
+		public void SetUp()
+		{
+			_quizSprocket = new Q.QuizSprocket();
+			_botMock = new Mock<IBot>();
+		}
 
-        [Test]
-        public void RepliesToCorrectRoom()
-        {
-            //arrange
-            var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "score"), "Simon", "jibbr");
+		private Q.QuizSprocket _quizSprocket;
+		private Mock<IBot> _botMock;
 
-            //act
-            _quizSprocket.Handle(chatMessage, _botMock.Object);
+		[Test]
+		public void AcceptsInfoAndHelpCommand()
+		{
+			//arrange
+			var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "info"), "Simon", "jibbr");
+			var chatMessage2 = new ChatMessage(string.Format("{0} {1}", "quiz", "help"), "Simon", "jibbr");
 
-            //assert
-            _botMock.Verify(b => b.Send(It.IsAny<string>(), It.Is<string>(room => room.Equals("jibbr"))));
-        }
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, chatMessage);
+			_quizSprocket.HandleMessage(_botMock.Object, chatMessage2);
 
-        [Test]
-        public void AcceptsInfoAndHelpCommand()
-        {
-            //arrange
-            var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "info"), "Simon", "jibbr");
-            var chatMessage2 = new ChatMessage(string.Format("{0} {1}", "quiz", "help"), "Simon", "jibbr");
+			//assert
+			_botMock.Verify(b => b.PrivateReply(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+		}
 
-            //act
-            _quizSprocket.Handle(chatMessage, _botMock.Object);
-            _quizSprocket.Handle(chatMessage2, _botMock.Object);
+		[Test]
+		public void BotRepliesWithNoScoreWhenNoScoreExists()
+		{
+			//arrange
+			var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "score"), "Simon", "jibbr");
 
-            //assert
-            _botMock.Verify(b => b.PrivateReply(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
-        }
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, chatMessage);
 
-        [Test]
-        public void InfoContainsSender()
-        {
-            //arrange
-            var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "info"), "Simon", "jibbr");
+			//assert
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Equals("No score recorded for Simon")), It.IsAny<string>()));
+		}
 
-            //act
-            _quizSprocket.Handle(chatMessage, _botMock.Object);
+		[Test]
+		public void BotRepliesWithScoreWhenItExists()
+		{
+			//arrange
+			CanAnswerQuestionCorrect();
+			var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "score"), "Simon", "jibbr");
 
-            //assert
-            _botMock.Verify(b => b.PrivateReply(It.Is<string>(who => who.Equals("Simon")), It.Is<string>(what => what.Contains("Simon"))));
-        }
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, chatMessage);
 
-        [Test]
-        public void CanAskCelebQuestion()
-        {
-            //arrange
-            var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
+			//assert
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("10")), It.IsAny<string>()));
+		}
 
-            //act
-            _quizSprocket.Handle(chatMessage, _botMock.Object);
+		[Test]
+		public void BotRepliesWithScoreboardWhenItExists()
+		{
+			//arrange
+			CanAnswerQuestionCorrect();
+			var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "top10"), "Simon", "jibbr");
 
-            //assert
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("?")), It.IsAny<string>()));
-        }
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, chatMessage);
 
-        [Test]
-        public void CanAnswerQuestion()
-        {
-            //arrange
-            var askQuestion = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
-            var answerQuestion = new ChatMessage(string.Format("{0} {1} {2}", "quiz", "answer", "abcdefg"), "Simon", "jibbr");
+			//assert
+			_botMock.Verify(
+				b => b.Send(It.Is<string>(what => what.Contains("1") && what.Contains("Simon") && what.Contains("10")), It.IsAny<string>()));
+		}
 
-            //act
-            _quizSprocket.Handle(askQuestion, _botMock.Object);
-            _quizSprocket.Handle(answerQuestion, _botMock.Object);
+		[Test]
+		public void CanAnswerQuestion()
+		{
+			//arrange
+			var askQuestion = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
+			var answerQuestion = new ChatMessage(string.Format("{0} {1} {2}", "quiz", "answer", "abcdefg"), "Simon", "jibbr");
 
-            //assert
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("?")), It.IsAny<string>()));
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("Correct") || what.Contains("Wrong")), It.IsAny<string>()));
-        }
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, askQuestion);
+			_quizSprocket.HandleMessage(_botMock.Object, answerQuestion);
 
-        [Test]
-        public void WillNotAllowANewQuestionBeforeThePreviousWasAnswered()
-        {
-            //arrange
-            var askQuestion = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
-            var askQuestion2 = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
+			//assert
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("?")), It.IsAny<string>()));
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("Correct") || what.Contains("Wrong")), It.IsAny<string>()));
+		}
 
-            //act
-            _quizSprocket.Handle(askQuestion, _botMock.Object);
-            _quizSprocket.Handle(askQuestion2, _botMock.Object);
+		[Test]
+		public void CanAnswerQuestionCorrect()
+		{
+			//arrange
+			var askQuestion = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
+			var answerQuestion = new ChatMessage(string.Format("{0} {1} {2}", "quiz", "answer", "b"), "Simon", "jibbr");
+			_quizSprocket.CelebrityQuestions = new List<Tuple<string, string, int>>()
+			                                   	{
+			                                   		new Tuple<string, string, int>("a", "b", 10)
+			                                   	};
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, askQuestion);
+			_quizSprocket.HandleMessage(_botMock.Object, answerQuestion);
 
-            //assert
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("?")), It.IsAny<string>()));
-            _botMock.Verify(b => b.PrivateReply(It.Is<string>(what => what.Equals("A question is currently waiting for the correct answer")), It.IsAny<string>()));
-        }
+			//assert
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Equals("a")), It.IsAny<string>()));
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("Correct")), It.IsAny<string>()));
+		}
 
-        [Test]
-        public void CanAnswerQuestionCorrect()
-        {
-            //arrange
-            var askQuestion = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
-            var answerQuestion = new ChatMessage(string.Format("{0} {1} {2}", "quiz", "answer", "b"), "Simon", "jibbr");
-            _quizSprocket.CelebrityQuestions = new List<Tuple<string, string, int>>()
-                                                   {
-                                                       new Tuple<string, string, int>("a", "b", 10)
-                                                   };
-            //act
-            _quizSprocket.Handle(askQuestion, _botMock.Object);
-            _quizSprocket.Handle(answerQuestion, _botMock.Object);
+		[Test]
+		public void CanAnswerQuestionCorrectWithAnswerWithSpace()
+		{
+			//arrange
+			var askQuestion = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
+			var answerQuestion = new ChatMessage(string.Format("{0} {1} {2}", "quiz", "answer", "b c"), "Simon", "jibbr");
+			_quizSprocket.CelebrityQuestions = new List<Tuple<string, string, int>>()
+			                                   	{
+			                                   		new Tuple<string, string, int>("a", "b c", 10)
+			                                   	};
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, askQuestion);
+			_quizSprocket.HandleMessage(_botMock.Object, answerQuestion);
 
-            //assert
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Equals("a")), It.IsAny<string>()));
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("Correct")), It.IsAny<string>()));
-        }
+			//assert
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Equals("a")), It.IsAny<string>()));
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("Correct")), It.IsAny<string>()));
+		}
 
-        [Test]
-        public void CanAnswerQuestionCorrectWithAnswerWithSpace()
-        {
-            //arrange
-            var askQuestion = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
-            var answerQuestion = new ChatMessage(string.Format("{0} {1} {2}", "quiz", "answer", "b c"), "Simon", "jibbr");
-            _quizSprocket.CelebrityQuestions = new List<Tuple<string, string, int>>()
-                                                   {
-                                                       new Tuple<string, string, int>("a", "b c", 10)
-                                                   };
-            //act
-            _quizSprocket.Handle(askQuestion, _botMock.Object);
-            _quizSprocket.Handle(answerQuestion, _botMock.Object);
+		[Test]
+		public void CanAskCelebQuestion()
+		{
+			//arrange
+			var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
 
-            //assert
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Equals("a")), It.IsAny<string>()));
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("Correct")), It.IsAny<string>()));
-        }
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, chatMessage);
 
-        [Test]
-        public void BotRepliesWithNoScoreWhenNoScoreExists()
-        {
-            //arrange
-            var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "score"), "Simon", "jibbr");
+			//assert
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("?")), It.IsAny<string>()));
+		}
 
-            //act
-            _quizSprocket.Handle(chatMessage, _botMock.Object);
+		[Test]
+		public void InfoContainsSender()
+		{
+			//arrange
+			var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "info"), "Simon", "jibbr");
 
-            //assert
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Equals("No score recorded for Simon")), It.IsAny<string>()));
-        }
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, chatMessage);
 
-        [Test]
-        public void BotRepliesWithScoreWhenItExists()
-        {
-            //arrange
-            CanAnswerQuestionCorrect();
-            var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "score"), "Simon", "jibbr");
+			//assert
+			_botMock.Verify(b => b.PrivateReply(It.Is<string>(who => who.Equals("Simon")), It.Is<string>(what => what.Contains("Simon"))));
+		}
 
-            //act
-            _quizSprocket.Handle(chatMessage, _botMock.Object);
+		[Test]
+		public void RepliesToCorrectRoom()
+		{
+			//arrange
+			var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "score"), "Simon", "jibbr");
 
-            //assert
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("10")), It.IsAny<string>()));
-        }
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, chatMessage);
 
-        [Test]
-        public void BotRepliesWithScoreboardWhenItExists()
-        {
-            //arrange
-            CanAnswerQuestionCorrect();
-            var chatMessage = new ChatMessage(string.Format("{0} {1}", "quiz", "top10"), "Simon", "jibbr");
+			//assert
+			_botMock.Verify(b => b.Send(It.IsAny<string>(), It.Is<string>(room => room.Equals("jibbr"))));
+		}
 
-            //act
-            _quizSprocket.Handle(chatMessage, _botMock.Object);
+		[Test]
+		public void WillNotAllowANewQuestionBeforeThePreviousWasAnswered()
+		{
+			//arrange
+			var askQuestion = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
+			var askQuestion2 = new ChatMessage(string.Format("{0} {1}", "quiz", "celeb"), "Simon", "jibbr");
 
-            //assert
-            _botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("1") && what.Contains("Simon") && what.Contains("10")), It.IsAny<string>()));
-        }
+			//act
+			_quizSprocket.HandleMessage(_botMock.Object, askQuestion);
+			_quizSprocket.HandleMessage(_botMock.Object, askQuestion2);
 
-    }
+			//assert
+			_botMock.Verify(b => b.Send(It.Is<string>(what => what.Contains("?")), It.IsAny<string>()));
+			_botMock.Verify(
+				b => b.PrivateReply(It.Is<string>(what => what.Equals("A question is currently waiting for the correct answer")), It.IsAny<string>()));
+		}
+	}
 }

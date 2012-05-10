@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using JabbR.Client.Models;
+using Jabbot.Core.Models;
 
 namespace Jabbot.Core.Sprockets
 {
@@ -7,7 +7,7 @@ namespace Jabbot.Core.Sprockets
 	{
 		public abstract Regex Pattern { get; }
 
-		public bool HandleMessage(IBot bot, Message message, string room)
+		public bool HandleMessage(IBot bot, ChatMessage message)
 		{
 			if (Pattern == null)
 			{
@@ -21,11 +21,11 @@ namespace Jabbot.Core.Sprockets
 				return false;
 			}
 
-			ProcessMatch(match, bot, message, room);
+			ProcessMatch(match, bot, message);
 
 			return true;
 		}
 
-		protected abstract void ProcessMatch(Match match, IBot bot, Message message, string room);
+		protected abstract void ProcessMatch(Match match, IBot bot, ChatMessage message);
 	}
 }

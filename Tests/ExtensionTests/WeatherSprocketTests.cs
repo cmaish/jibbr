@@ -52,8 +52,8 @@ namespace ExtensionTests
             _proxy.Setup(c => c.Get(It.IsAny<string>())).Returns(File.ReadAllText("90001.txt"));
             var match = _subject.Pattern.Match("weather 90001");
             var message = new ChatMessage("ABC", "user", "room");
-            
-            _subject.ProcessMatch(match, message, _bot.Object);
+
+        	_subject.HandleMessage(_bot.Object, message);
             
             _bot.Verify(b => b.Send(It.IsAny<string>(), "room"));
         }

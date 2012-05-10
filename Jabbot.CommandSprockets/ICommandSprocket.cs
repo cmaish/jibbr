@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using JabbR.Client.Models;
 using Jabbot.Core;
+using Jabbot.Core.Models;
 using Jabbot.Core.Sprockets;
 
 namespace Jabbot.CommandSprockets
@@ -12,7 +12,7 @@ namespace Jabbot.CommandSprockets
 		string Command { get; }
 		bool HasArguments { get; }
 		string Intitiator { get; }
-		Message ChatMessage { get; }
+		ChatMessage ChatMessage { get; }
 		IEnumerable<string> SupportedCommands { get; }
 		IEnumerable<string> SupportedInitiators { get; }
 		bool ExecuteCommand();

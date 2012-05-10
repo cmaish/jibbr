@@ -7,13 +7,13 @@ namespace Help
 {
 	public class HelpSprocket : ISprocket
 	{
-		public bool Handle(ChatMessage chatMessage, IBot bot)
+		public bool HandleMessage(IBot bot, ChatMessage message)
 		{
-			var acceptedCommands = new string[] { bot.Name + " help", "@" + bot.Name + " help" };
+			var acceptedCommands = new[] {bot.Name + " help", "@" + bot.Name + " help"};
 
-			if (acceptedCommands.Contains(chatMessage.Content.Trim()))
+			if (acceptedCommands.Contains(message.Content.Trim()))
 			{
-				bot.PrivateReply(chatMessage.User.Name, "A list of commands this bot currently supports:\n\thelp");
+				bot.PrivateReply(message.User.Name, "A list of commands this bot currently supports:\n\thelp");
 
 				return true;
 			}

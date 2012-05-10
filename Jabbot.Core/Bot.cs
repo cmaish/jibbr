@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JabbR.Client;
 using JabbR.Client.Models;
+using Jabbot.Core.Models;
 using Jabbot.Core.Sprockets;
 
 namespace Jabbot.Core
@@ -59,9 +60,11 @@ namespace Jabbot.Core
 
 		private void OnMessageReceived(Message message, string room)
 		{
+			var modelMessage = new ChatMessage(message.Content, message.User.Name, room);
+
 			foreach (var sprocket in _sprockets)
 			{
-				var handled = sprocket.HandleMessage(this, message, room);
+				var handled = sprocket.HandleMessage(this, modelMessage);
 
 				if (handled)
 				{

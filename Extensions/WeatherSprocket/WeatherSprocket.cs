@@ -2,8 +2,8 @@
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
-using JabbR.Client.Models;
 using Jabbot.Core;
+using Jabbot.Core.Models;
 using Jabbot.Core.Sprockets;
 using Newtonsoft.Json.Linq;
 
@@ -23,7 +23,7 @@ namespace WeatherSprocket
 			get { return new Regex(@"(?<=\bweather[ ])\d{4,5}", RegexOptions.IgnoreCase); }
 		}
 
-		protected override void ProcessMatch(Match match, IBot bot, Message message, string room)
+		protected override void ProcessMatch(Match match, IBot bot, ChatMessage message)
 		{
 			if (match.Length > 0)
 			{
@@ -31,7 +31,7 @@ namespace WeatherSprocket
 
 				var weather = GetWeather(firstResult);
 
-				bot.Send(weather, room);
+				bot.Send(weather, message.Room);
 			}
 		}
 
@@ -39,6 +39,7 @@ namespace WeatherSprocket
 		{
 			var requestUri = String.Format("http://api.wunderground.com/api/ffb2f3f9960dd675/geolookup/conditions/forecast/q/{0}.json", zipcode);
 			var responseFromServer = _proxy.Get(requestUri);
+
 			JObject obj = JObject.Parse(responseFromServer);
 			JToken currentObservation = obj["current_observation"];
 			JToken displayLocation = obj["current_observation"]["display_location"];
@@ -47,6 +48,7 @@ namespace WeatherSprocket
 			var weather = (string) currentObservation["weather"];
 			var temperature = (string) currentObservation["temperature_string"];
 			var output = string.Format("Weather in {0} is {1} and {2}", cityState, temperature, weather);
+
 			return output;
 		}
 
@@ -58,9 +60,11 @@ namespace WeatherSprocket
 			var dataStream = response.GetResponseStream();
 			var reader = new StreamReader(dataStream);
 			var responseFromServer = reader.ReadToEnd();
+
 			reader.Close();
 			dataStream.Close();
 			response.Close();
+
 			return responseFromServer;
 		}
 	}
