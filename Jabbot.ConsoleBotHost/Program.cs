@@ -47,8 +47,10 @@ namespace Jabbot.ConsoleBotHost
                 var client = new JabbRClient(ServerUrl);
 
                 var bot = new Bot(client);
-                
-                foreach (var s in container.GetExportedValues<ISprocket>())
+
+            	var sprockets = container.GetExportedValues<ISprocket>();
+
+            	foreach (var s in sprockets)
                     bot.AddSprocket(s);
 
                 bot.Connect(BotName, BotPassword);
@@ -62,12 +64,12 @@ namespace Jabbot.ConsoleBotHost
             		client.Send("Hello World", firstRoom.Name);
             	}
 
-            	scheduler.Start(announcements, bot);
+            	//scheduler.Start(announcements, bot);
 
                 Console.Write("Press enter to quit...");
                 Console.ReadLine();
 
-                scheduler.Stop();
+                //scheduler.Stop();
                 client.Disconnect();
 
                 _appShouldExit = true;
