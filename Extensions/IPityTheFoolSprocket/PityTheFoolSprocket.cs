@@ -14,7 +14,7 @@ namespace IPityTheFoolSprocket
 
 		protected override void ProcessMatch(Match match, IBot bot, ChatMessage message)
 		{
-			bot.Send("http://xamldev.dk/IPityTheFool.gif", message.User.Name);
+			bot.Send("http://xamldev.dk/IPityTheFool.gif", message.Room);
 		}
 	}
 }
