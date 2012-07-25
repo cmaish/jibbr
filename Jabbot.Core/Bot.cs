@@ -60,6 +60,11 @@ namespace Jabbot.Core
 
 		private void OnMessageReceived(Message message, string room)
 		{
+			if (message.User.Name.Equals(Name))
+			{
+				return;
+			}
+
 			var modelMessage = new ChatMessage(message.Content, message.User.Name, room);
 
 			foreach (var sprocket in _sprockets)
