@@ -13,6 +13,10 @@ namespace WeatherSprocket
 	{
 		private readonly IProxy _proxy;
 
+		public WeatherSprocket()
+		{
+		}
+
 		public WeatherSprocket(IProxy proxy)
 		{
 			_proxy = proxy;
