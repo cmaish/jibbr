@@ -23,7 +23,7 @@ namespace Jabbot.ConsoleBotHost
 
         private const string ExtensionsFolder = "Sprockets";
 
-        static void Main(string[] args)
+        static void Main()
         {
             Console.WriteLine("Jabbot Bot Runner Starting...");
             while (!_appShouldExit)
@@ -39,6 +39,7 @@ namespace Jabbot.ConsoleBotHost
                 var scheduler = new Scheduler();
 
                 var container = CreateCompositionContainer();
+				
                 // Add all the sprockets to the sprocket list
                 var announcements = container.GetExportedValues<IAnnounce>();
 
