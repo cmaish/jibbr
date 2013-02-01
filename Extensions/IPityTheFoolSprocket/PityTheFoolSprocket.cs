@@ -14,7 +14,7 @@ namespace IPityTheFoolSprocket
 
 		protected override void ProcessMatch(Match match, ChatMessage message, IBot bot)
 		{
-			bot.Say("http://xamldev.dk/IPityTheFool.gif", message.Receiver);
+            bot.Say("http://4.bp.blogspot.com/-1-1_GAfGz1I/UIOp235sYFI/AAAAAAAALjI/qlJAoiQ41Mg/s1600/mr-t-mrt-pity-the-fool-pities-mohawk.jpg", message.Receiver);
 		}
 	}
 }

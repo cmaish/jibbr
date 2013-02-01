@@ -7,15 +7,16 @@ using System.Net;
 using System.Threading.Tasks;
 using Jabbot.Models;
 using Jabbot.Sprockets.Core;
-using SignalR.Client.Hubs;
+using Microsoft.AspNet.SignalR.Client.Hubs;
 
 namespace Jabbot
 {
+    using Microsoft.AspNet.SignalR.Client;
+
     public class Bot : IBot
     {
         private HubConnection _connection;
         private IHubProxy _chat;
-        private string _password;
         private readonly List<ISprocket> _sprockets = new List<ISprocket>();
         private readonly List<IUnhandledMessageSprocket> _unhandledMessageSprockets = new List<IUnhandledMessageSprocket>();
         private readonly HashSet<string> _rooms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -23,9 +24,31 @@ namespace Jabbot
         public Bot(string url, string name, string password)
         {
             Name = name;
-            _password = password;
             _connection = new HubConnection(url);
-            _chat = _connection.CreateProxy("JabbR.Chat");
+            _connection.CookieContainer = this.BuildCookieContainer(url + "/account/login", name, password);
+            _chat = _connection.CreateHubProxy("Chat");
+        }
+
+        private CookieContainer BuildCookieContainer(string loginUrl, string user, string pass)
+        {
+            var http = WebRequest.Create(loginUrl) as HttpWebRequest;
+            http.AllowAutoRedirect = false;
+            http.Method = "POST";
+            http.ContentType = "application/x-www-form-urlencoded";
+            http.CookieContainer = new CookieContainer();
+            var postData = "username=" + user + "&password=" + pass;
+            byte[] dataBytes = System.Text.Encoding.UTF8.GetBytes(postData);
+            http.ContentLength = dataBytes.Length;
+            using (var postStream = http.GetRequestStream())
+            {
+                postStream.Write(dataBytes, 0, dataBytes.Length);
+            }
+            var httpResponse = http.GetResponse() as HttpWebResponse;
+
+            var container = new CookieContainer();
+            container.Add(httpResponse.Cookies["NCSRF"]);
+            container.Add(httpResponse.Cookies["jabbr.userToken"]);
+            return container;
         }
 
         public string Name { get; private set; }
@@ -89,7 +112,7 @@ namespace Jabbot
         /// </summary>
         public void PowerUp(IEnumerable<ISprocketInitializer> sprocketInitializers = null)
         {
-            if (!_connection.IsActive)
+            if (_connection.State == ConnectionState.Disconnected)
             {
                 _chat.On<dynamic, string>("addMessage", ProcessMessage);
                 _chat.On<string, string, string>("sendPrivateMessage", ProcessPrivateMessage);
@@ -100,16 +123,13 @@ namespace Jabbot
                 _chat.On<dynamic, string>("addUser", ProcessRoomArrival);
 
                 // Start the connection and wait
-                _connection.Start(SignalR.Client.Transports.Transport.LongPolling).Wait();
+                _connection.Start().Wait();
 
                 // Join the chat
                 var success = _chat.Invoke<bool>("Join").Result;
 
                 if (!success)
                 {
-                    // Setup the name of the bot
-                    Send(String.Format("/nick {0} {1}", Name, _password));
-
                     if (sprocketInitializers != null)
                         IntializeSprockets(sprocketInitializers);
                 }
@@ -122,7 +142,7 @@ namespace Jabbot
         /// <param name="room">room to create</param>
         public void CreateRoom(string room)
         {
-            Send("/create " + room);
+            Send("/create " + room, null);
 
             // Add the room to the list
             _rooms.Add(room);
@@ -171,15 +191,10 @@ namespace Jabbot
         {
             try
             {
-                // Set the active room
-                _chat["activeRoom"] = room;
-
-                Say(what);
+                Send(what, room);
             }
             finally
             {
-                // Reset the active room to null
-                _chat["activeRoom"] = null;
             }
         }
 
@@ -499,7 +514,12 @@ namespace Jabbot
 
         private void Send(string command)
         {
-            _chat.Invoke("send", command).Wait();
+            this.Send(command, null);
+        }
+
+        private void Send(string command, string room)
+        {
+            _chat.Invoke("send", new { Id=Guid.NewGuid().ToString("d"), Content=command, Room=room }).Wait();
         }
 
     }
